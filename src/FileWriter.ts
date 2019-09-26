@@ -109,24 +109,40 @@ export class FileWriter extends FileBase {
     }
 
     public async writeInt64BE(value: bigint): Promise<void> {
+        if (!Buffer.prototype.writeBigInt64BE) {
+            throw new NotSupportedError('writeBigInt64BE not supported!');
+        }
+
         const buffer = this.bufferAlloc(8);
         buffer.writeBigInt64BE(value, 0);
         return this.write(buffer);
     }
 
     public async writeInt64LE(value: bigint): Promise<void> {
+        if (!Buffer.prototype.writeBigInt64LE) {
+            throw new NotSupportedError('writeBigInt64LE not supported!');
+        }
+
         const buffer = this.bufferAlloc(8);
         buffer.writeBigInt64LE(value, 0);
         return this.write(buffer);
     }
 
     public async writeUInt64BE(value: bigint): Promise<void> {
+        if (!Buffer.prototype.writeBigUInt64BE) {
+            throw new NotSupportedError('writeBigUInt64BE not supported!');
+        }
+
         const buffer = this.bufferAlloc(8);
         buffer.writeBigUInt64BE(value, 0);
         return this.write(buffer);
     }
 
     public async writeUInt64LE(value: bigint): Promise<void> {
+        if (!Buffer.prototype.writeBigUInt64LE) {
+            throw new NotSupportedError('writeBigUInt64LE not supported!');
+        }
+
         const buffer = this.bufferAlloc(8);
         buffer.writeBigUInt64LE(value, 0);
         return this.write(buffer);
