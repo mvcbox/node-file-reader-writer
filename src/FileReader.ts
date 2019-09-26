@@ -30,13 +30,17 @@ export class FileReader {
             this.fd = await fsOpen(this.file, this.flags);
         }
 
-        this.stats = await fsFstat(this.fd);
+        await this.refreshStats();
     }
 
     public async destroy() {
         if (typeof this.file !== 'number' && typeof this.fd === 'number') {
             await fsClose(this.fd);
         }
+    }
+
+    public async refreshStats(): Promise<void> {
+        this.stats = await fsFstat(this.fd);
     }
 
     public offset(size: number): this {
