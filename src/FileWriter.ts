@@ -131,4 +131,28 @@ export class FileWriter extends FileBase {
         buffer.writeBigUInt64LE(value, 0);
         return this.write(buffer);
     }
+
+    public async writeFloatBE(value: number): Promise<void> {
+        const buffer = this.bufferAlloc(4);
+        buffer.writeFloatBE(value, 0);
+        return this.write(buffer);
+    }
+
+    public async writeFloatLE(value: number): Promise<void> {
+        const buffer = this.bufferAlloc(4);
+        buffer.writeFloatLE(value, 0);
+        return this.write(buffer);
+    }
+
+    public async writeDoubleBE(value: number): Promise<void> {
+        const buffer = this.bufferAlloc(8);
+        buffer.writeDoubleBE(value, 0);
+        return this.write(buffer);
+    }
+
+    public async writeDoubleLE(value: number): Promise<void> {
+        const buffer = this.bufferAlloc(8);
+        buffer.writeDoubleLE(value, 0);
+        return this.write(buffer);
+    }
 }
