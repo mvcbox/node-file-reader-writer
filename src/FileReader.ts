@@ -1,53 +1,22 @@
 import fs from 'fs';
 import Bluebird from 'bluebird';
+import { FileBase } from './FileBase';
 import { NotSupportedError } from './errors';
 
-const fsOpen = Bluebird.promisify(fs.open);
 const fsRead = Bluebird.promisify(fs.read);
-const fsClose = Bluebird.promisify(fs.close);
 const fsFstat = Bluebird.promisify(fs.fstat);
 
-export class FileReader {
-    public fd: number;
-    public flags: string;
-    public stats: fs.Stats;
-    public pointer: number = 0;
-    public file: number | string;
-
+export class FileReader extends FileBase {
     public constructor(file: number | string, flags?: string) {
-        this.file = file;
-        this.flags = flags || 'r';
+        super(file, flags || 'r');
     }
 
     public get length(): number {
         return this.stats.size;
     }
 
-    public async init(): Promise<void> {
-        if (typeof this.file === 'number') {
-            this.fd = this.file;
-        } else {
-            this.fd = await fsOpen(this.file, this.flags);
-        }
-
-        await this.refreshStats();
-    }
-
-    public async destroy(): Promise<void> {
-        if (typeof this.file !== 'number' && typeof this.fd === 'number') {
-            await fsClose(this.fd);
-        }
-
-        this.fd = this.file = -1;
-    }
-
     public async refreshStats(): Promise<void> {
         this.stats = await fsFstat(this.fd);
-    }
-
-    public offset(size: number): this {
-        this.pointer += size;
-        return this;
     }
 
     public isReadable(size: number): boolean {
@@ -91,43 +60,43 @@ export class FileReader {
     }
 
     public async readInt8(): Promise<number> {
-        return (await this.read(1)).readInt8(0);
+        return this.readIntBE(1);
     }
 
     public async readUInt8(): Promise<number> {
-        return (await this.read(1)).readUInt8(0);
+        return this.readUIntBE(1);
     }
 
     public async readInt16BE(): Promise<number> {
-        return (await this.read(2)).readInt16BE(0);
+        return this.readIntBE(2);
     }
 
     public async readInt16LE(): Promise<number> {
-        return (await this.read(2)).readInt16LE(0);
+        return this.readIntLE(2);
     }
 
     public async readUInt16BE(): Promise<number> {
-        return (await this.read(2)).readUInt16BE(0);
+        return this.readUIntBE(2);
     }
 
     public async readUInt16LE(): Promise<number> {
-        return (await this.read(2)).readUInt16LE(0);
+        return this.readUIntLE(2);
     }
 
     public async readInt32BE(): Promise<number> {
-        return (await this.read(4)).readInt32BE(0);
+        return this.readIntBE(4);
     }
 
     public async readInt32LE(): Promise<number> {
-        return (await this.read(4)).readInt32LE(0);
+        return this.readIntLE(4);
     }
 
     public async readUInt32BE(): Promise<number> {
-        return (await this.read(4)).readUInt32BE(0);
+        return this.readUIntBE(4);
     }
 
     public async readUInt32LE(): Promise<number> {
-        return (await this.read(4)).readUInt32LE(0);
+        return this.readUIntLE(4);
     }
 
     public async readInt64BE(): Promise<bigint> {

@@ -1,45 +1,20 @@
 import fs from 'fs';
 import Bluebird from 'bluebird';
+import { FileBase } from './FileBase';
 import { NotSupportedError } from './errors';
 
-const fsOpen = Bluebird.promisify(fs.open);
-const fsClose = Bluebird.promisify(fs.close);
 const fsFstat = Bluebird.promisify(fs.fstat);
 const fsWrite = Bluebird.promisify(fs.write) as (fd: number, buffer: Buffer, offset: number, length: number, position: number) => Promise<number>;
 
-export class FileWriter {
-    public fd: number;
-    public flags: string;
-    public stats: fs.Stats;
-    public pointer: number = 0;
+export class FileWriter extends FileBase {
     public fileSize: number = 0;
-    public file: number | string;
 
     public constructor(file: number | string, flags?: string) {
-        this.file = file;
-        this.flags = flags || 'w';
+        super(file, flags || 'w');
     }
 
     public get length(): number {
         return this.fileSize;
-    }
-
-    public async init(): Promise<void> {
-        if (typeof this.file === 'number') {
-            this.fd = this.file;
-        } else {
-            this.fd = await fsOpen(this.file, this.flags);
-        }
-
-        await this.refreshStats();
-    }
-
-    public async destroy(): Promise<void> {
-        if (typeof this.file !== 'number' && typeof this.fd === 'number') {
-            await fsClose(this.fd);
-        }
-
-        this.fd = this.file = -1;
     }
 
     public async refreshStats(): Promise<void> {
@@ -47,9 +22,8 @@ export class FileWriter {
         this.fileSize = this.stats.size;
     }
 
-    public offset(size: number): this {
-        this.pointer += size;
-        return this;
+    public bufferAlloc(size: number): Buffer {
+        return Buffer.allocUnsafe ? Buffer.allocUnsafe(size) : new Buffer(size);
     }
 
     public async write(data: Buffer): Promise<void> {
@@ -67,6 +41,94 @@ export class FileWriter {
     }
 
     public async writeString(string: string, encoding?: BufferEncoding): Promise<void> {
-        await this.write(Buffer.from ? Buffer.from(string, encoding) : new Buffer(string, encoding));
+        return this.write(Buffer.from ? Buffer.from(string, encoding) : new Buffer(string, encoding));
+    }
+
+    public async writeIntBE(size: number, value: number): Promise<void> {
+        const buffer = this.bufferAlloc(size);
+        buffer.writeIntBE(value, 0, size);
+        return this.write(buffer);
+    }
+
+    public async writeIntLE(size: number, value: number): Promise<void> {
+        const buffer = this.bufferAlloc(size);
+        buffer.writeIntLE(value, 0, size);
+        return this.write(buffer);
+    }
+
+    public async writeUIntBE(size: number, value: number): Promise<void> {
+        const buffer = this.bufferAlloc(size);
+        buffer.writeUIntBE(value, 0, size);
+        return this.write(buffer);
+    }
+
+    public async writeUIntLE(size: number, value: number): Promise<void> {
+        const buffer = this.bufferAlloc(size);
+        buffer.writeUIntLE(value, 0, size);
+        return this.write(buffer);
+    }
+
+    public async writeInt8(value: number): Promise<void> {
+        return this.writeIntBE(1, value);
+    }
+
+    public async writeUInt8(value: number): Promise<void> {
+        return this.writeUIntBE(1, value);
+    }
+
+    public async writeInt16BE(value: number): Promise<void> {
+        return this.writeIntBE(2, value);
+    }
+
+    public async writeInt16LE(value: number): Promise<void> {
+        return this.writeIntLE(2, value);
+    }
+
+    public async writeUInt16BE(value: number): Promise<void> {
+        return this.writeUIntBE(2, value);
+    }
+
+    public async writeUInt16LE(value: number): Promise<void> {
+        return this.writeUIntLE(2, value);
+    }
+
+    public async writeInt32BE(value: number): Promise<void> {
+        return this.writeIntBE(4, value);
+    }
+
+    public async writeInt32LE(value: number): Promise<void> {
+        return this.writeIntLE(4, value);
+    }
+
+    public async writeUInt32BE(value: number): Promise<void> {
+        return this.writeUIntBE(4, value);
+    }
+
+    public async writeUInt32LE(value: number): Promise<void> {
+        return this.writeUIntLE(4, value);
+    }
+
+    public async writeInt64BE(value: bigint): Promise<void> {
+        const buffer = this.bufferAlloc(8);
+        buffer.writeBigInt64BE(value, 0);
+        return this.write(buffer);
+    }
+
+    public async writeInt64LE(value: bigint): Promise<void> {
+        const buffer = this.bufferAlloc(8);
+        buffer.writeBigInt64LE(value, 0);
+        return this.write(buffer);
+    }
+
+    public async writeUInt64BE(value: bigint): Promise<void> {
+        const buffer = this.bufferAlloc(8);
+        buffer.writeBigUInt64BE(value, 0);
+        return this.write(buffer);
+    }
+
+    public async writeUInt64LE(value: bigint): Promise<void> {
+        const buffer = this.bufferAlloc(8);
+        buffer.writeBigUInt64LE(value, 0);
+        return this.write(buffer);
     }
 }
