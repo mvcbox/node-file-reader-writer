@@ -14,9 +14,9 @@ export class FileReader {
     public pointer: number = 0;
     public file: number | string;
 
-    public constructor(file: number | string, flags: string = 'r') {
+    public constructor(file: number | string, flags?: string) {
         this.file = file;
-        this.flags = flags;
+        this.flags = flags || 'r';
     }
 
     public get length(): number {
@@ -39,12 +39,12 @@ export class FileReader {
         }
     }
 
-    public offset(size: number = 0): this {
+    public offset(size: number): this {
         this.pointer += size;
         return this;
     }
 
-    public isReadable(size: number = 1): boolean {
+    public isReadable(size: number): boolean {
         return this.stats.size - this.pointer >= size;
     }
 
