@@ -44,6 +44,6 @@ export abstract class FileBase {
         return this;
     }
 
-    abstract get length(): number;
-    abstract refreshStats(): Promise<void>;
+    public abstract get length(): number;
+    public abstract refreshStats(): Promise<void>;
 }
