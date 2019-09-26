@@ -33,10 +33,12 @@ export class FileReader {
         await this.refreshStats();
     }
 
-    public async destroy() {
+    public async destroy(): Promise<void> {
         if (typeof this.file !== 'number' && typeof this.fd === 'number') {
             await fsClose(this.fd);
         }
+
+        this.fd = this.file = -1;
     }
 
     public async refreshStats(): Promise<void> {
